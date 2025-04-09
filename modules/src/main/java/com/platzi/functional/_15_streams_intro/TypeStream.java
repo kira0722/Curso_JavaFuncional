@@ -1,9 +1,7 @@
 package com.platzi.functional._15_streams_intro;
 
-import javax.swing.text.html.Option;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -85,6 +83,9 @@ public class TypeStream {
 
         System.out.println("\n \n \n");
 
+        //Tema de reduce, los tres tipos
+
+        //reduce binaryaccumulator
         Stream<String> aLongStoryStream = Stream.of("Cuando", "despertó,", "el", "dinosaurio", "todavía", "estaba", "allí.");
         Optional<String> longStoryOptional = aLongStoryStream.reduce((previousStory, nextPart) -> previousStory + " " + nextPart);
         longStoryOptional.ifPresent(System.out::println); //"Cuando despertó, el dinosaurio todavía estaba allí."
@@ -93,6 +94,7 @@ public class TypeStream {
 
         System.out.println("\n \n \n");
 
+        //reduce(valorIniciar, BinaryOperator)
         Stream<Integer> firstTenNumbersStream = Stream.iterate(0, i -> i + 1).limit(10);
         int sumOfFirstTen = firstTenNumbersStream.reduce(0, Integer::sum);
         System.out.println("el resultado de la suma del stream es: "+sumOfFirstTen);
@@ -104,14 +106,159 @@ public class TypeStream {
 
         System.out.println("\n \n \n");
 
+
+        //reduce (valorInicial, BinaryFunction <v, t , v>, BinaryOperator<v>
         Stream<String> aLongStoryStreamAgain = Stream.of("Cuando", "despertó,", "el", "dinosaurio", "todavía", "estaba", "allí.");
         int charCount = aLongStoryStreamAgain.reduce(0, (count, word) -> count + word.length(), Integer::sum);
         System.out.println("Este es el resultado de la suma de la longitud del stream: " + charCount);
+
         System.out.println("\nHasta aqui el tema de reduce(valorInicial (0), BinaryFunction(count valor acumulado, word es el siguiente elemento" +
                 "\nword.leght calcula la longitud de cada palabra en el stream" +
                 "\ncount + word.lenght, en cada paso suma la longitud de la palabra al acumulador: count" +
                 "\ncount es el numero total de caracteres de todas las palabras en el stream)" +
-                "\nBinaryOperator(Integer::sum, es un stream paralelo) ");
+                "\nBinaryOperator(Integer::sum, es un stream paralelo, ya que el stream se divide en varios hilos y cada uno tiene su acumulador" +
+                "\nel combine se encarga de combinar los resultados parciales de cada hilo para producir el resultado final) ");
+
+        System.out.println("\n \n \n");
+
+
+        //COUNT, cuenta la longitud que tiene un stream
+        Stream<Integer> yearsStream = Stream.of(1990, 1991, 1994, 2000, 2010, 2019, 2020, 2021, 2022, 2023, 2024, 2025);
+        long yearsCount = yearsStream.count();
+        System.out.println("La longitud existente en el stream es de: " + yearsCount);
+        System.out.println("\nHasta aqui va el teme de count, que cuenta la longitud del stream");
+
+        System.out.println("\n \n \n");
+
+
+
+        //toarray, agrega los datos de un stream, a un arreglo, si queremos podemos especificar que tipo de dato queremos o si lo dejamos
+        //por default, lo cual seria un tipo objeto
+        Stream<String> numbersText = Stream.of("uno", "dos", "tres");
+//        Object[] array = numbersText.toArray();
+        String[] arrayText = numbersText.toArray(String[]::new);
+        for (String obj : arrayText){
+            System.out.println(obj);
+        }
+
+        System.out.println("\nHasta aqui el tema de toArray, el cual agrega todos los datos del stream, y los convierte a un arreglo" +
+                "\nDonde el tipo de dato por defecto es (object), o podemos especificar que tipo de dato queremos manejar " );
+        System.out.println("\n \n \n");
+
+
+        //filter y map (filtrado y transformacion de datos)
+        List<Integer> numeritos = Arrays.asList(1, 2, 3, 32, 45, 42, 46, 50);
+        List<Integer> numeritosFiltros = numeritos.stream()
+                .filter(n -> n % 2 == 0)
+                .filter(n -> n > 10)
+                .map(n -> n * 2)
+                .collect(Collectors.toList());
+
+        System.out.println(numeritosFiltros);
+        System.out.println("\nHasta aqui va el tema de .filter(que filtra una lista o stream, segun las condiociones que nostros" +
+                "\nDecidamos poner), .map (transforma los elementos de un stream, aplicando una funcion u accion, a cada uno" +
+                "\n de los elementos");
+        System.out.println("\n \n \n");
+
+
+
+        //flatMap
+        List<List<Integer>> listaDeListas = Arrays.asList(
+                Arrays.asList(1, 2, 3),
+                Arrays.asList(4, 5),
+                Arrays.asList(6, 7, 8),
+                Arrays.asList(19, 32, 12)
+        );
+
+        // Aplanar la lista de listas en un solo Stream de números
+        List<Integer> resultado2  = listaDeListas.stream()
+                .flatMap(List::stream)  // Aplanar cada lista dentro del Stream
+                .collect(Collectors.toList());
+
+        System.out.println("Esta es la fusion de 2 listas en una: "+resultado2);
+        System.out.println("\nHasta aqui va el tema de flatmap (trasnforma los elementos del stream original, en un nuevo stream de elementos y los aplana" +
+                "\n en un solo stream)");
+        System.out.println("\n \n \n");
+
+
+//        Stream<List<Courses>> coursesLists; // Stream{List["Java", "Java 8 Functional", "Spring"], List["React", "Angular", "Vue.js"], List["Big Data", "Pandas"]}
+//        Stream<Courses> allCourses;
+
+
+
+        //distinc
+        List<Integer> numeritos2 = Arrays.asList(1, 2, 3, 4 ,4 ,5, 5);
+        List<Integer> resultaditos2 = numeritos2.stream()
+                .distinct()
+                .collect(Collectors.toList());
+        System.out.println("Esta es la lista sin duplicados: "+resultaditos2);
+        System.out.println("\nHasta aqui va el tema de distinc(el cual elimina los datos duplicados)");
+        System.out.println("\n \n \n");
+
+
+        //limit
+        List<Integer> numeritos3 = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+
+        // Crear un Stream y limitar a los primeros 3 números
+        List<Integer> primerosTres = numeritos3.stream()
+                .limit(3)
+                .collect(Collectors.toList());
+
+        System.out.println("Los primeros 3 numeros son: "+primerosTres);
+        System.out.println("\nHasta aqui va el tema de limit (el cual limita la salida de datos del stream, al limite que nostros decidamos");
+        System.out.println("\n \n \n");
+
+
+        //peek
+        List<Integer> numeritos4 = Arrays.asList(1, 2, 3, 4, 5, 6);
+
+        // Crear un Stream, aplicar transformaciones y usar peek para inspeccionar los elementos
+        List<Integer> resultado4 = numeritos4.stream()
+                .filter(n -> n % 2 == 0)   // Filtrar solo números pares
+                .peek(n -> System.out.println("Después de filter: " + n))  // Inspeccionar después del filtro
+                .map(n -> n * 2)           // Multiplicar por 2
+                .peek(n -> System.out.println("Después de map: " + n))    // Inspeccionar después del map
+                .collect(Collectors.toList());  // Recolectar el resultado
+
+        // Imprimir el resultado final
+        System.out.println("Resultado final: " + resultado4);
+        System.out.println("\nHasta aqui va el tema de peek (es un log dentro del stream, no modifica el stream, solo muestra" +
+                "\nel proceso que esta sucediendo dentro del stream");
+        System.out.println("\n \n \n");
+
+
+
+
+        //skip
+        List<Integer> numeritos5 = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+
+        // Crear un Stream, omitir los primeros 3 elementos y recolectar el resto
+        List<Integer> resultado5 = numeritos5.stream()
+                .skip(3)  // Omitir los primeros 3 elementos
+                .collect(Collectors.toList());
+
+        // Imprimir el resultado
+        System.out.println("Este es el resultado, despues de omitir los 3 primeros numeros: "+resultado5);
+        System.out.println("\nHasta aqui va el tema de skip(el cual omite los 3 primeros elementos del stream, sin modificar el stream");
+        System.out.println("\n \n \n");
+
+
+
+
+
+        //sorted
+        List<String> palabras = Arrays.asList("java", "python", "c", "javascript", "ruby");
+
+        // Crear un Stream y ordenar por la longitud de las palabras
+        List<String> resultadoTexto = palabras.stream()
+                .sorted(Comparator.comparingInt(String::length))  // Ordenar por longitud
+                .collect(Collectors.toList());
+
+        // Imprimir el resultado
+        System.out.println("Este es el resultado de ordenar el texto por longitud"+resultadoTexto);
+        System.out.println("\nHasta aqui va el tema de sorted(el cual ordena el stream, por defecto de menor a mayor" +
+                "\ncon comparator, le estaras dando un orden personalizado segun las necesidades de uno");
+        System.out.println("\n \n \n");
 
 
 
